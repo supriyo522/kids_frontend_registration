@@ -1,7 +1,7 @@
-// frontend/app.js
 document.getElementById('registrationForm').addEventListener('submit', async function (event) {
     event.preventDefault();
 
+    // Get input values from the form
     const name = document.getElementById('name').value;
     const mobileNo = document.getElementById('mobileNo').value;
     const email = document.getElementById('email').value;
@@ -21,11 +21,22 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
         if (response.ok) {
             responseMessage.textContent = 'Registration successful!';
             responseMessage.style.color = 'green';
-            document.getElementById('registrationForm').reset(); 
+            // Reset the form after successful submission
+            document.getElementById('registrationForm').reset();
         } else {
-            const error = await response.json();
-            responseMessage.textContent = `Error: ${error.message}`;
-            responseMessage.style.color = 'red';
+            const errorData = await response.json();
+            
+            // Detecting if the error is due to a duplicate entry
+            if (response.status === 400 && errorData.message.includes('Duplicate entry detected')) {
+                responseMessage.textContent = 'Error: Duplicate entry detected for mobile number, email, or bill number.';
+                responseMessage.style.color = 'red';
+            } else if (response.status === 400) {
+                responseMessage.textContent = `Error: ${errorData.message}`;
+                responseMessage.style.color = 'red';
+            } else {
+                responseMessage.textContent = 'Error: Something went wrong during registration.';
+                responseMessage.style.color = 'red';
+            }
         }
     } catch (error) {
         responseMessage.textContent = `Error: ${error.message}`;
